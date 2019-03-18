@@ -1,0 +1,36 @@
+version: '3.6'
+services:   
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:${TAG}
+    environment:
+      - bootstrap.memory_lock=true
+      - ES_JAVA_OPTS=-Xms${NODE_MEM} -Xmx${NODE_MEM}
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+       soft: 65536
+       hard: 65536
+    volumes:
+      - ./elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+      - ${ES_DATA_PATH_1}:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "2048k"
+        max-file: "5"
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:${TAG}
+    volumes:
+      - ./kibana.yml:/usr/share/kibana/config/kibana.yml
+    depends_on: ['elasticsearch']
+    ports: ['5601:5601']
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "2048k"
+        max-file: "5"
